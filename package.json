@@ -10,10 +10,14 @@
   },
   "dependencies": {
     "http-server": "^0.11.1",
-    "minimist": "^1.2.6",
-    "websocket": "~1.0.22"
+    "minimist": "^1.2.8",
+    "websocket": "^1.0.34"
   },
   "devDependencies": {
+    "@biomejs/biome": "1.7.2",
+    "@types/bun": "^1.1.1",
+    "@types/minimist": "^1.2.5",
+    "@types/websocket": "^1.0.10",
     "gh-pages": "^0.10.0"
   },
   "repository": {

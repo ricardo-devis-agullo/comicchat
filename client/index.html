@@ -1,58 +1,80 @@
 <!DOCTYPE html>
 <html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="referrer" content="no-referrer" />
+    <title>comic chat</title>
+    <link rel="stylesheet" href="./css/cchat.css" />
+    <link rel="shortcut icon" href="./res/icon.gif" />
+  </head>
 
-<head>
-  <meta charset="utf-8">
-  <meta name="referrer" content="no-referrer">
-  <title>comic chat</title>
-  <link rel="stylesheet" href="./css/cchat.css">
-  <link rel="shortcut icon" href="./res/icon.gif" />
-</head>
+  <body>
+    <div id="content"></div>
 
-<body>
-  <div id="content"></div>
+    <div class="input-bar">
+      <form id="input-form">
+        <input
+          type="text"
+          id="input"
+          placeholder="Your nickname"
+          autocomplete="off"
+          autofocus
+          required
+        />
+      </form>
 
-  <div class="input-bar">
+      <form id="room-switcher-form">
+        <input
+          type="text"
+          id="room-switcher"
+          title="Switch rooms..."
+          placeholder="Room"
+          required
+        />
+      </form>
 
-    <form id="input-form">
-      <input type="text" id="input" placeholder="Your nickname" autocomplete="off" autofocus required />
-    </form>
+      <div class="options">
+        <div id="status" class="status" title="Connection status">
+          Connecting...
+        </div>
 
-    <form id="room-switcher-form">
-        <input type="text" id="room-switcher" title="Switch rooms..." placeholder="Room" required />
-    </form>
+        <input type="checkbox" name="notify" id="notify" />
+        <label title="Requires Notifications API support." for="notify"
+          >Notifications</label
+        >
 
-    <div class="options">
-      <div id="status" class="status" title="Connection status">Connecting...</div>
+        <input type="checkbox" name="tts" id="tts" />
+        <label title="Requires Web Speech API support." for="tts"
+          >Text-to-speech</label
+        >
 
-      <input type="checkbox" name="notify" id="notify" />
-      <label title="Requires Notifications API support." for="notify">Notifications</label>
-
-      <input type="checkbox" name="tts" id="tts" />
-      <label title="Requires Web Speech API support." for="tts">Text-to-speech</label>
-
-      <a href="https://www.github.com/gyng/comicchat" target="_blank" title="GitHub">
-        <img src="res/executable_script_shortcut.gif">
-      </a>
+        <a
+          href="https://www.github.com/gyng/comicchat"
+          target="_blank"
+          title="GitHub"
+        >
+          <img src="res/executable_script_shortcut.gif" />
+        </a>
+      </div>
     </div>
-  </div>
 
-  <!-- Templates -->
-  <div id="box-template" class="template">
-    <div class="box">
+    <!-- Templates -->
+    <div id="box-template" class="template">
+      <div class="box"></div>
     </div>
-  </div>
 
-  <div id="actor-template" class="template">
-    <div class="actor">
-      <div class="text chat-bubble"></div>
-      <div class="name"></div>
-      <div class="avatar"></div>
+    <div id="actor-template" class="template">
+      <div class="actor">
+        <div class="text chat-bubble"></div>
+        <div class="name"></div>
+        <div class="avatar"></div>
+      </div>
     </div>
-  </div>
 
-  <script src="./js/ui.js"></script>
-  <script src="./js/client.js"></script>
-</body>
+    <script type="module">
+      import { run } from "./js/client.js";
 
+      run();
+    </script>
+  </body>
 </html>
