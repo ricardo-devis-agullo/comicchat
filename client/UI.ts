@@ -29,15 +29,15 @@ export class UI {
   private readonly ttsEnabled: HTMLInputElement;
   private readonly roomSwitcher: HTMLInputElement;
   private readonly roomSwitcherForm: HTMLFormElement;
+  private readonly maxActorsPerBox: number;
+  private readonly synth: SpeechSynthesis;
   private connection: connection | null;
   private notification: Notification | null;
   private backgrounds: string[];
-  private readonly maxActorsPerBox: number;
   private currentBoxActors: number;
   private currentBoxes: number;
   private currentBox: HTMLDivElement | null;
   private previousAuthor: string | null;
-  private readonly synth: SpeechSynthesis;
   private characters: any;
 
   constructor(elements: Elements) {
@@ -73,9 +73,6 @@ export class UI {
     this.connection = connection;
   }
 
-  setStatus(status: string) {
-    this.status.innerHTML = status;
-  }
   connected() {
     this.roomSwitcher.placeholder = window.location.hash;
     this.roomSwitcher.value = window.location.hash;
@@ -84,32 +81,18 @@ export class UI {
     this.roomSwitcher.disabled = false;
     this.setStatus("Connected.");
   }
+
   disconnected() {
     this.input.disabled = true;
     this.input.placeholder = "No connection";
     this.roomSwitcher.disabled = true;
     this.setStatus("Disconnected.");
   }
+
   reconnecting() {
     this.setStatus("Reconnecting...");
   }
-  setupNotifications() {
-    this.notifyEnabled.onclick = this.requestNotificationsPermission.bind(this);
-    this.notification =
-      this.notification ||
-      window.Notification ||
-      (window as any).webkitNotifications;
-    if (typeof this.notification === "undefined")
-      this.notifyEnabled.disabled = true;
-  }
-  requestNotificationsPermission() {
-    if (
-      typeof this.notification !== "undefined" &&
-      this.notification!.permission === "default"
-    ) {
-      this.notification!.requestPermission();
-    }
-  }
+
   notify(data: Message) {
     if (
       typeof this.notification !== "undefined" &&
@@ -123,15 +106,7 @@ export class UI {
       });
     }
   }
-  getVoicesFor(voices: SpeechSynthesisVoice[], lang: string) {
-    const result: SpeechSynthesisVoice[] = [];
-    for (let i = 0; i < voices.length; i++) {
-      if (voices[i].lang === lang) {
-        result.push(voices[i]);
-      }
-    }
-    return result;
-  }
+
   tts(data: Message) {
     if (this.ttsEnabled.checked === true && typeof this.synth !== "undefined") {
       const utterable = new SpeechSynthesisUtterance(data.text);
@@ -164,7 +139,78 @@ export class UI {
       this.synth.speak(utterable);
     }
   }
-  setupShortcuts() {
+
+  addHistory(history: any) {
+    for (let i = 0; i < history.length; i++) {
+      this.addLine(JSON.parse(history[i]), false);
+    }
+    window.scrollTo(0, document.body.scrollHeight);
+  }
+
+  addLine(message: Message, stickBottom?: boolean) {
+    // Make a new box if
+    // * We hit maximum number of actors in a box
+    // * No boxes
+    // * It's a monologue
+    const newBox =
+      this.currentBoxActors >= this.maxActorsPerBox ||
+      this.currentBoxes === 0 ||
+      this.previousAuthor === message.author;
+    if (newBox === true) {
+      this.currentBox = this.makeBox(message);
+      this.content.appendChild(this.currentBox);
+      if (typeof stickBottom === "undefined" || stickBottom === true) {
+        window.scrollTo(0, document.body.scrollHeight);
+      }
+      this.currentBoxActors = 0;
+      this.currentBoxes++;
+    }
+    const flip = this.currentBoxActors >= this.maxActorsPerBox / 2;
+    this.currentBox!.appendChild(this.makeActor(message, flip));
+    this.currentBoxActors++;
+    this.previousAuthor = message.author;
+  }
+
+  private setStatus(status: string) {
+    this.status.innerHTML = status;
+  }
+
+  private requestNotificationsPermission() {
+    if (
+      typeof this.notification !== "undefined" &&
+      this.notification!.permission === "default"
+    ) {
+      this.notification!.requestPermission();
+    }
+  }
+
+  private setupNotifications() {
+    this.notifyEnabled.onclick = this.requestNotificationsPermission.bind(this);
+    this.notification =
+      this.notification ||
+      window.Notification ||
+      (window as any).webkitNotifications;
+    if (typeof this.notification === "undefined")
+      this.notifyEnabled.disabled = true;
+  }
+
+  private getVoicesFor(voices: SpeechSynthesisVoice[], lang: string) {
+    const result: SpeechSynthesisVoice[] = [];
+    for (let i = 0; i < voices.length; i++) {
+      if (voices[i].lang === lang) {
+        result.push(voices[i]);
+      }
+    }
+    return result;
+  }
+
+  private clearContent() {
+    this.content.innerHTML = "";
+    this.currentBoxActors = 0;
+    this.currentBoxes = 0;
+  }
+
+  private setupShortcuts() {
     this.inputForm.onsubmit = (e) => {
       e.preventDefault();
       this.connection?.send(
@@ -205,41 +251,8 @@ export class UI {
       );
     };
   }
-  clearContent() {
-    this.content.innerHTML = "";
-    this.currentBoxActors = 0;
-    this.currentBoxes = 0;
-  }
-  addHistory(history: any) {
-    for (let i = 0; i < history.length; i++) {
-      this.addLine(JSON.parse(history[i]), false);
-    }
-    window.scrollTo(0, document.body.scrollHeight);
-  }
-  addLine(message: Message, stickBottom?: boolean) {
-    // Make a new box if
-    // * We hit maximum number of actors in a box
-    // * No boxes
-    // * It's a monologue
-    const newBox =
-      this.currentBoxActors >= this.maxActorsPerBox ||
-      this.currentBoxes === 0 ||
-      this.previousAuthor === message.author;
-    if (newBox === true) {
-      this.currentBox = this.makeBox(message);
-      this.content.appendChild(this.currentBox);
-      if (typeof stickBottom === "undefined" || stickBottom === true) {
-        window.scrollTo(0, document.body.scrollHeight);
-      }
-      this.currentBoxActors = 0;
-      this.currentBoxes++;
-    }
-    const flip = this.currentBoxActors >= this.maxActorsPerBox / 2;
-    this.currentBox!.appendChild(this.makeActor(message, flip));
-    this.currentBoxActors++;
-    this.previousAuthor = message.author;
-  }
-  makeBox(message: Message) {
+
+  private makeBox(message: Message) {
     const boxTemplate = document.getElementById("box-template")!.innerHTML;
     const box = document.createElement("div");
     const name = this.makeBackground(message);
@@ -248,7 +261,8 @@ export class UI {
     box.getElementsByTagName("div")[0].style.backgroundImage = url;
     return box.getElementsByTagName("div")[0];
   }
-  makeBackground(message: Message) {
+
+  private makeBackground(message: Message) {
     if (this.backgrounds?.length) {
       const bgix =
         this.getHashCode(`${message.text} ${message.author} ${message.time}`) %
@@ -256,7 +270,8 @@ export class UI {
       return `./res/backgrounds/${this.backgrounds[bgix]}.gif`;
     }
   }
-  makeActor(message: Message, flip: boolean) {
+
+  private makeActor(message: Message, flip: boolean) {
     const actorTemplate = document.getElementById("actor-template")!.innerHTML;
     const characters = this.characters;
     const character =
