@@ -4,13 +4,14 @@
   "description": "a web version of comicchat",
   "main": "server/server.js",
   "scripts": {
-    "start": "node server/server.js",
-    "client": "http-server client -g",
+    "start": "run-p start:*",
+    "start:server": "bun server/server.ts",
+    "start:client": "serve client",
     "deploy": "gh-pages -d client"
   },
   "dependencies": {
-    "http-server": "^0.11.1",
     "minimist": "^1.2.8",
+    "serve": "^14.2.3",
     "websocket": "^1.0.34"
   },
   "devDependencies": {
@@ -18,7 +19,8 @@
     "@types/bun": "^1.1.1",
     "@types/minimist": "^1.2.5",
     "@types/websocket": "^1.0.10",
-    "gh-pages": "^0.10.0"
+    "gh-pages": "^0.10.0",
+    "npm-run-all": "^4.1.5"
   },
   "repository": {
     "type": "git",
