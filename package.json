@@ -4,7 +4,8 @@
   "description": "a web version of comicchat",
   "main": "server/server.js",
   "scripts": {
-    "start": "run-p start:*",
+    "build": "bun build client/client.ts --outfile static/js/client.js",
+    "start": "bun run build && run-p start:*",
     "start:server": "bun server/server.ts",
     "start:client": "serve client",
     "deploy": "gh-pages -d client"
